@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Water - Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;min-height:100vh;background:#0a0e27;color:#e0e6ff;overflow-x:hidden}
+.bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.3;animation:float 8s ease-in-out infinite}
+.orb-1{width:300px;height:300px;background:#3b82f6;top:-50px;left:-50px;animation-delay:0s}
+.orb-2{width:250px;height:250px;background:#06b6d4;bottom:10%;right:-30px;animation-delay:3s}
+.orb-3{width:200px;height:200px;background:#8b5cf6;top:50%;left:50%;animation-delay:5s}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.05)}}
+
+/* LOGIN */
+.login-container,.admin-container{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-card{background:rgba(15,20,50,.7);backdrop-filter:blur(20px);border:1px solid rgba(99,130,255,.15);border-radius:24px;padding:48px 40px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.login-card h1{font-size:28px;font-weight:800;text-align:center;background:linear-gradient(135deg,#60a5fa,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.login-card .sub{text-align:center;color:#7a85b0;font-size:14px;margin-bottom:36px}
+.field{margin-bottom:22px}
+.field label{display:block;font-size:13px;font-weight:600;color:#8892b8;margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px}
+.field input{width:100%;padding:14px 18px;background:rgba(30,40,80,.6);border:1px solid rgba(99,130,255,.2);border-radius:14px;color:#e0e6ff;font-size:15px;font-family:'Inter',sans-serif;transition:all .3s}
+.field input:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+.btn{width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .3s;background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#fff;letter-spacing:.5px}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(59,130,246,.35)}
+.btn:active{transform:translateY(0)}
+.error-msg{color:#f87171;font-size:13px;text-align:center;margin-top:16px;min-height:20px}
+
+/* ADMIN */
+.admin-panel{background:rgba(15,20,50,.7);backdrop-filter:blur(20px);border:1px solid rgba(99,130,255,.15);border-radius:24px;padding:40px;width:100%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.admin-panel h1{font-size:26px;font-weight:800;text-align:center;background:linear-gradient(135deg,#60a5fa,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.admin-panel .sub{text-align:center;color:#7a85b0;font-size:13px;margin-bottom:32px}
+.tank-card{background:rgba(30,40,80,.5);border:1px solid rgba(99,130,255,.1);border-radius:16px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden}
+.tank-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
+.tank-card.t1::before{background:linear-gradient(180deg,#3b82f6,#06b6d4)}
+.tank-card.t3::before{background:linear-gradient(180deg,#8b5cf6,#a855f7)}
+.tank-card h3{font-size:16px;font-weight:700;margin-bottom:4px}
+.tank-card .field-tag{font-size:12px;color:#7a85b0;margin-bottom:14px}
+.tank-card input{width:100%;padding:14px 18px;background:rgba(15,20,50,.6);border:1px solid rgba(99,130,255,.2);border-radius:12px;color:#e0e6ff;font-size:16px;font-family:'Inter',sans-serif;transition:all .3s}
+.tank-card input:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+.result{margin-top:20px;padding:16px;border-radius:14px;text-align:center;font-size:14px;font-weight:600;display:none}
+.result.ok{display:block;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#4ade80}
+.result.err{display:block;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#f87171}
+.result.loading{display:block;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:#60a5fa}
+.logout-btn{margin-top:16px;width:100%;padding:12px;border:1px solid rgba(248,113,113,.3);border-radius:14px;background:transparent;color:#f87171;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .3s}
+.logout-btn:hover{background:rgba(248,113,113,.1)}
+.hidden{display:none!important}
+
+/* Water icon */
+.water-icon{text-align:center;margin-bottom:20px;font-size:48px}
+</style>
+</head>
+<body>
+<div class="bg-orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+
+<!-- LOGIN -->
+<div class="login-container" id="loginPage">
+  <div class="login-card">
+    <div class="water-icon">💧</div>
+    <h1>Admin Panel</h1>
+    <p class="sub">Smart Water V5 — Tank Configuration</p>
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="Enter username" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Enter password">
+    </div>
+    <button class="btn" id="loginBtn" onclick="login()">Sign In</button>
+    <div class="error-msg" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="admin-container hidden" id="adminPage">
+  <div class="admin-panel">
+    <div class="water-icon">⚙️</div>
+    <h1>Tank Height Settings</h1>
+    <p class="sub">Set heights and send to ThingSpeak (Fields 4 & 5)</p>
+
+    <div class="tank-card t1">
+      <h3>🪣 Tank 1 Height</h3>
+      <p class="field-tag">→ ThingSpeak Field 4</p>
+      <input type="number" id="tank1" placeholder="Enter height in cm" min="0" step="0.1">
+    </div>
+
+    <div class="tank-card t3">
+      <h3>🪣 Tank 3 Height</h3>
+      <p class="field-tag">→ ThingSpeak Field 5</p>
+      <input type="number" id="tank3" placeholder="Enter height in cm" min="0" step="0.1">
+    </div>
+
+    <button class="btn" id="sendBtn" onclick="sendData()">Send to ThingSpeak</button>
+    <div class="result" id="result"></div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<script>
+const VALID_USER = 'boss admin';
+const VALID_PASS = '4321';
+const CHANNEL = '3211060';
+const API_KEY = '6Q72NJN7EXEGQWMI';
+
+function login() {
+  const u = document.getElementById('username').value.trim();
+  const p = document.getElementById('password').value;
+  const err = document.getElementById('loginError');
+  if (u === VALID_USER && p === VALID_PASS) {
+    err.textContent = '';
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('adminPage').classList.remove('hidden');
+  } else {
+    err.textContent = 'Invalid username or password';
+  }
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !document.getElementById('loginPage').classList.contains('hidden')) login();
+});
+
+function sendData() {
+  const t1 = document.getElementById('tank1').value;
+  const t3 = document.getElementById('tank3').value;
+  const res = document.getElementById('result');
+  const btn = document.getElementById('sendBtn');
+
+  if (!t1 && !t3) { res.className='result err'; res.textContent='Please enter at least one tank height'; return; }
+
+  res.className = 'result loading';
+  res.textContent = 'Sending...';
+  btn.disabled = true;
+
+  let url = 'https://api.thingspeak.com/update?api_key=' + API_KEY;
+  if (t1) url += '&field4=' + encodeURIComponent(t1);
+  if (t3) url += '&field5=' + encodeURIComponent(t3);
+
+  fetch(url)
+    .then(r => r.text())
+    .then(d => {
+      btn.disabled = false;
+      if (d && d.trim() !== '0') {
+        res.className = 'result ok';
+        res.textContent = '✅ Sent successfully! (Entry #' + d.trim() + ')';
+      } else {
+        res.className = 'result err';
+        res.textContent = '⚠️ ThingSpeak returned 0 — wait 15s between updates';
+      }
+    })
+    .catch(e => {
+      btn.disabled = false;
+      res.className = 'result err';
+      res.textContent = '❌ Error: ' + e.message;
+    });
+}
+
+function logout() {
+  document.getElementById('adminPage').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
+  document.getElementById('tank1').value = '';
+  document.getElementById('tank3').value = '';
+  document.getElementById('result').className = 'result';
+}
+</script>
+</body>
+</html>
