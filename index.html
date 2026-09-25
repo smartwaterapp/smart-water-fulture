@@ -33,8 +33,20 @@
   <title>Smart Water</title>
   <link rel="manifest" href="manifest.json">
 </head>
-<body>
   <script>
+    // Force unregister existing service workers to eliminate stale cached main.dart.js
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (let name of names) caches.delete(name);
+        });
+      }
+    }
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
